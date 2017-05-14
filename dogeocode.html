@@ -1,0 +1,429 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Massachusetts Crash Reporting Form</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/esri/css/esri.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 20px;
+            padding: 0px;
+            width: 100%;
+            color: #353129;
+            overflow: none;
+            overflow: hidden;
+            font-size:12px;
+        }
+        #tab-content{
+            height:500px;
+        }
+        #results {
+            /*height: 350px;
+            overflow-y: auto;*/
+        }
+        .input-group{
+            border:2px solid #000;
+            padding:10px;
+        }
+        .input-label{
+                width: 150px;
+        }
+        .input-value{
+
+        }
+        #search {
+            display: block;
+        }
+
+        .simpleGeocoder .esriGeocoderContainer {
+            width: 40%;
+        }
+
+        #searchRow {
+            margin: 30px;
+            /*margin-left: 95px;*/
+        }
+
+        #headerRow {
+            padding: 10px;
+        }
+
+        #mainInput {
+            height: 500px;
+            overflow-wrap: break-word;
+        }
+
+        #inputRow {
+            margin: 30px;
+            display: block;
+        }
+
+        #mainRow {
+            margin: 30px;
+            overflow-wrap: break-word;
+        }
+
+        #resultsdiv {
+    height: 500px;
+    overflow-y: scroll;
+    margin-right: 50px;
+        }
+
+        #currentextent {
+            display: none;
+        }
+
+        fieldset {
+            border: 1px solid #353129;
+            color: #353129;
+            padding: 20px;
+        }
+
+        #map {
+            margin: 0 auto !important;
+            padding: 0;
+        }
+
+        #t1 {
+            overflow-y: auto;
+        }
+    </style>
+
+    <script src="https://js.arcgis.com/3.20/"></script>
+    <script>
+        var locator, map;
+
+        require([
+          "esri/map", "esri/tasks/locator",
+          "esri/dijit/Geocoder",
+          "esri/SpatialReference", "esri/graphic",
+          "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleMarkerSymbol",
+          "esri/symbols/Font", "esri/symbols/TextSymbol",
+          "esri/geometry/Point", "esri/geometry/Extent",
+          "esri/geometry/webMercatorUtils",
+          "dojo/_base/array", "esri/Color",
+          "dojo/number", "dojo/parser", "dojo/dom", "dojo/json", "dijit/registry",
+
+          "dijit/form/Button", "dijit/form/Textarea",
+          "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojo/domReady!"
+        ], function (
+          Map, Locator, Geocoder,
+          SpatialReference, Graphic,
+          SimpleLineSymbol, SimpleMarkerSymbol,
+          Font, TextSymbol,
+          Point, Extent,
+          webMercatorUtils,
+          arrayUtils, Color,
+          number, parser, dom, JSON, registry
+        ) {
+            parser.parse();
+
+            map = new Map("map", {
+                basemap: "topo",
+                center: [-96.311, 43.676],
+                zoom: 3
+            });
+
+            locator = new Locator("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+
+            var geocoder;
+            if (0 == 1) {
+                geocoder = new Geocoder({
+                    map: null,
+                    arcgisGeocoder: false,
+                    geocoders: [{
+                        url: "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer",
+                        name: "Esri Geocoder USA",
+                        placeholder: "Locate",
+                        outFields: "*"
+                    }],
+                    autoComplete: true,
+                }, dom.byId("search"));
+            }
+            else {
+                geocoder = new Geocoder({
+                    map: null,
+                    arcgisGeocoder: true,
+                    autoComplete: true,
+                }, dom.byId("search"));
+            }
+
+            geocoder.on("find-results",function(res){
+                showResults2(res);
+            });
+
+            geocoder.startup();
+            
+            registry.byId("locate").on("click", locate);
+
+            //Draw and zoom to the result when the geocoding is complete
+            locator.on("address-to-locations-complete", function (evt) {
+                map.graphics.clear();
+                arrayUtils.forEach(evt.addresses, function (geocodeResult, index) {
+                    //create a random color for the text and marker symbol
+                    var r = Math.floor(Math.random() * 250);
+                    var g = Math.floor(Math.random() * 100);
+                    var b = Math.floor(Math.random() * 100);
+
+                    var symbol = new SimpleMarkerSymbol(
+                      SimpleMarkerSymbol.STYLE_CIRCLE,
+                      20,
+                      new SimpleLineSymbol(
+                        SimpleLineSymbol.STYLE_SOLID,
+                        new Color([r, g, b, 0.5]),
+                        10
+                      ), new Color([r, g, b, 0.9]));
+                    var pointMeters = webMercatorUtils.geographicToWebMercator(geocodeResult.location);
+                    var locationGraphic = new Graphic(pointMeters, symbol);
+
+                    var font = new Font().setSize("12pt").setWeight(Font.WEIGHT_BOLD);
+                    var textSymbol = new TextSymbol(
+                      (index + 1) + ".) " + geocodeResult.address,
+                      font,
+                      new Color([r, g, b, 0.8])
+                    ).setOffset(5, 15);
+                    //add the location graphic and text with the address to the map
+                    map.graphics.add(locationGraphic);
+                    map.graphics.add(new Graphic(pointMeters, textSymbol));
+                });
+                var ptAttr = evt.addresses[0].attributes;
+                var minx = parseFloat(ptAttr.Xmin);
+                var maxx = parseFloat(ptAttr.Xmax);
+                var miny = parseFloat(ptAttr.Ymin);
+                var maxy = parseFloat(ptAttr.Ymax);
+
+                var esriExtent = new Extent(minx, miny, maxx, maxy, new SpatialReference({ wkid: 4326 }));
+                map.setExtent(webMercatorUtils.geographicToWebMercator(esriExtent));
+
+                showResults(evt.addresses);
+            });
+
+            map.on("extent-change", updateExtent);
+
+            function updateExtent() {
+                dom.byId("currentextent").innerHTML = "<b>Current Extent JSON:</b> " + JSON.stringify(map.extent.toJson());
+                dom.byId("currentextent").innerHTML += "<br/><b>Current Zoom level:</b> " + map.getLevel();
+            }
+
+            function showResults2(results) {
+                var rdiv = dom.byId("resultsdiv");
+                rdiv.innerHTML = "<p><b>Results : " + results.length + "</b></p>";
+
+                var content = [];
+                arrayUtils.forEach(results, function (result, index) {
+                    var x = result.location.x.toFixed(5);
+                    var y = result.location.y.toFixed(5);
+                    content.push("<fieldset>");
+                    content.push("<legend><b>" + (index + 1) + ". " + result.address + "</b></legend>");
+                    content.push("<i>Score:</i> " + result.score);
+                    content.push("<br/>");
+                    content.push("<i>Address Found In</i> : " + result.address);
+                    content.push("<br/><br/>");
+                    content.push("Latitude (y): " + y);
+                    content.push("&nbsp;&nbsp;");
+                    content.push("Longitude (x): " + x);
+                    content.push("<br/><br/>");
+                    //content.push("<b>GeoRSS-Simple</b><br/>");
+                    //content.push("&lt;georss:point&gt;" + y + " " + x + "&lt;/georss:point&gt;");
+                    //content.push("<br/><br/>");
+                    //content.push("<b>GeoRSS-GML</b><br/>");
+                    //content.push("&lt;georss:where&gt;&lt;gml:Point&gt;&lt;gml:pos&gt;" + y + " " + x + "&lt;/gml:pos&gt;&lt;gml:Point&gt;&lt;/georss:where&gt;");
+                    //content.push("<br/><br/>");
+                    //content.push("<b>Esri JSON</b><br/>");
+                    //content.push("<b>WGS:</b> " + JSON.stringify(result.location.toJson()));
+                    //content.push("<br/>");
+
+                    var location_wm = webMercatorUtils.geographicToWebMercator(result.location);
+
+                    //content.push("<b>WM:</b> " + JSON.stringify(location_wm.toJson()));
+                    //content.push("<br/><br/>");
+                    //content.push("<b>Geo JSON</b><br/>");
+                    //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
+                    content.push("<br/><br/>");
+                    content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
+                    content.push("</fieldset>");
+                });
+                rdiv.innerHTML += content.join("");
+            }
+            function showResults(results) {
+                var rdiv = dom.byId("resultsdiv");
+                rdiv.innerHTML = "<p><b>Results : " + results.length + "</b></p>";
+
+                var content = [];
+                arrayUtils.forEach(results, function (result, index) {
+                    var x = result.location.x.toFixed(5);
+                    var y = result.location.y.toFixed(5);
+                    content.push("<fieldset>");
+                    content.push("<legend><b>" + (index + 1) + ". " + result.address + "</b></legend>");
+                    content.push("<i>Score:</i> " + result.score);
+                    content.push("<br/>");
+                    content.push("<i>Address Found In</i> : " + result.address);
+                    content.push("<br/><br/>");
+                    content.push("Latitude (y): " + y);
+                    content.push("&nbsp;&nbsp;");
+                    content.push("Longitude (x): " + x);
+                    content.push("<br/><br/>");
+                    //content.push("<b>GeoRSS-Simple</b><br/>");
+                    //content.push("&lt;georss:point&gt;" + y + " " + x + "&lt;/georss:point&gt;");
+                    //content.push("<br/><br/>");
+                    //content.push("<b>GeoRSS-GML</b><br/>");
+                    //content.push("&lt;georss:where&gt;&lt;gml:Point&gt;&lt;gml:pos&gt;" + y + " " + x + "&lt;/gml:pos&gt;&lt;gml:Point&gt;&lt;/georss:where&gt;");
+                    //content.push("<br/><br/>");
+                    //content.push("<b>Esri JSON</b><br/>");
+                    //content.push("<b>WGS:</b> " + JSON.stringify(result.location.toJson()));
+                    //content.push("<br/>");
+
+                    var location_wm = webMercatorUtils.geographicToWebMercator(result.location);
+
+                    //content.push("<b>WM:</b> " + JSON.stringify(location_wm.toJson()));
+                    //content.push("<br/><br/>");
+                    //content.push("<b>Geo JSON</b><br/>");
+                    //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
+                    content.push("<br/><br/>");
+                    content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
+                    content.push("</fieldset>");
+                });
+                rdiv.innerHTML += content.join("");
+            }
+
+            //Perform the geocode. This function runs when the "Locate" button is pushed.
+            function locate() {
+                var address = {
+                    SingleLine: dom.byId("address").value
+                };
+                var options = {
+                    address: address,
+                    outFields: ["*"]
+                };
+                //optionally return the out fields if you need to calculate the extent of the geocoded point
+                locator.addressToLocations(options);
+            }
+        });
+
+        function zoomTo(lat, lon) {
+            require([
+              "esri/geometry/Point", "esri/geometry/webMercatorUtils"
+            ], function (Point, webMercatorUtils) {
+                var point = new Point(lon, lat, {
+                    wkid: "4326"
+                });
+                var wmpoint = webMercatorUtils.geographicToWebMercator(point);
+                map.centerAt(wmpoint);
+
+                //show tab
+                $('#mymap').tab('show')
+            });
+        }
+    </script>
+
+</head>
+
+<body class="claro">
+    <div id="headerRow" class="row">
+
+        <img src="images/massDOTBanner-IntroPage.png" />
+
+    </div>
+
+    <div id="mainInput" class="row">
+        <div class="col-6">
+            <div id="searchRow">
+                <div>
+                    Where Did the Crash Occur:
+                    <div id="search"></div>
+                </div>
+            </div>
+            <div id="inputRow">
+                <div>
+                    <div class="input-group">
+                        <label class="input-label"> Street:</label>
+                        <input class="input-value" type="text"  id="address" size="60" value="25 Boylson St, Boston, MA" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label"> Intersection:</label>
+                        <input class="input-value" type="text"  id="intersection" size="60" value="280" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">
+                            Landmark:
+                        </label>
+                        <input class="input-value" type="text"  id="route" size="60" value="Fenway" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">
+                            Route:
+                        </label>
+                        <input class="input-value" type="text"  id="route" size="60" value="95-N" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">
+                            Milepost:
+                        </label>
+                        <input class="input-value" type="text"  id="milepost" size="60" value="52.1" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">
+                            Exit:
+                        </label>
+                        <input class="input-value" type="text"  id="exit" size="60" value="3" />
+                    </div>
+
+                    <button id="locate" data-dojo-type="dijit/form/Button">Locate</button>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="col-6">
+            <ul class="nav nav-pills" role="tablist">
+                <li role="presentation"><a href="#myresults" aria-controls="myresults" role="tab" data-toggle="tab">Results</a></li>
+                <li role="presentation"><a href="#mymap" aria-controls="mymap" role="tab" data-toggle="tab">Map</a></li>
+            </ul>
+            <div class="tab-content" id="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="myresults">
+                    <div id="results">
+                        <div id="currentextent"></div>
+                        <div id="resultsdiv"></div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="mymap">
+                    <div  id="map">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="mainRow" class="row">
+
+
+
+        <div class="col-6" id="t1">
+
+
+
+
+        </div>
+
+
+    </div>
+</body>
+</html>
