@@ -45,9 +45,11 @@
         }
 
         .simpleGeocoder .esriGeocoderContainer {
-            width: 40%;
+            width: 400px;
         }
-
+        .simpleGeocoder .esriGeocoderContainer input {
+            width:300px;
+        }
         #searchRow {
             margin: 30px;
             /*margin-left: 95px;*/
@@ -151,18 +153,26 @@
             }
             else {
                 geocoder = new Geocoder({
-                    map: null,
+                    map: map,
                     arcgisGeocoder: true,
                     autoComplete: true,
                 }, dom.byId("search"));
             }
 
-            geocoder.on("find-results",function(res){
+
+
+            geocoder.startup();
+            geocoder.on("find-results", function (res) {
+                //showResults2(res);
+            });
+            geocoder.on("select", function (res) {
+                showResults2([res]);
+            });
+
+            dojo.connect(geocoder, "onFindResults", function (response) {
                 showResults2(res);
             });
 
-            geocoder.startup();
-            
             registry.byId("locate").on("click", locate);
 
             //Draw and zoom to the result when the geocoding is complete
@@ -220,8 +230,16 @@
 
                 var content = [];
                 arrayUtils.forEach(results, function (result, index) {
-                    var x = result.location.x.toFixed(5);
-                    var y = result.location.y.toFixed(5);
+                    result.location = result.result.feature.geometry;
+                    result.address = result.result.name;
+                    result.score = result.result.feature.attributes.score;
+
+
+                    var location_wm = result.location;//webMercatorUtils.geographicToWebMercator(result.location);
+                    var location_xy = webMercatorUtils.webMercatorToGeographic(result.location);
+
+                    var x = location_xy.x.toFixed(5);
+                    var y = location_xy.y.toFixed(5);
                     content.push("<fieldset>");
                     content.push("<legend><b>" + (index + 1) + ". " + result.address + "</b></legend>");
                     content.push("<i>Score:</i> " + result.score);
@@ -242,14 +260,12 @@
                     //content.push("<b>WGS:</b> " + JSON.stringify(result.location.toJson()));
                     //content.push("<br/>");
 
-                    var location_wm = webMercatorUtils.geographicToWebMercator(result.location);
-
                     //content.push("<b>WM:</b> " + JSON.stringify(location_wm.toJson()));
                     //content.push("<br/><br/>");
                     //content.push("<b>Geo JSON</b><br/>");
                     //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
                     content.push("<br/><br/>");
-                    content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
+                    content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + location_xy.y + "," + location_xy.x + ")'/>");
                     content.push("</fieldset>");
                 });
                 rdiv.innerHTML += content.join("");
@@ -290,6 +306,8 @@
                     //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
                     content.push("<br/><br/>");
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
+
+                    //content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
                     content.push("</fieldset>");
                 });
                 rdiv.innerHTML += content.join("");
@@ -309,7 +327,38 @@
             }
         });
 
-        function zoomTo(lat, lon) {
+        function showLocation(geocodeResult) {
+            map.graphics.clear();
+            
+            //create a random color for the text and marker symbol
+            var r = Math.floor(Math.random() * 250);
+            var g = Math.floor(Math.random() * 100);
+            var b = Math.floor(Math.random() * 100);
+
+            var symbol = new SimpleMarkerSymbol(
+                SimpleMarkerSymbol.STYLE_CIRCLE,
+                20,
+                new SimpleLineSymbol(
+                SimpleLineSymbol.STYLE_SOLID,
+                new Color([r, g, b, 0.5]),
+                10
+                ), new Color([r, g, b, 0.9]));
+            var pointMeters = webMercatorUtils.geographicToWebMercator(geocodeResult.location);
+            var locationGraphic = new Graphic(pointMeters, symbol);
+
+            var font = new Font().setSize("12pt").setWeight(Font.WEIGHT_BOLD);
+            var textSymbol = new TextSymbol(
+                (index + 1) + ".) " + geocodeResult.address,
+                font,
+                new Color([r, g, b, 0.8])
+            ).setOffset(5, 15);
+            //add the location graphic and text with the address to the map
+            map.graphics.add(locationGraphic);
+            map.graphics.add(new Graphic(pointMeters, textSymbol));
+         
+        }
+
+        function zoomTo(lat, lon,label) {
             require([
               "esri/geometry/Point", "esri/geometry/webMercatorUtils"
             ], function (Point, webMercatorUtils) {
@@ -318,6 +367,14 @@
                 });
                 var wmpoint = webMercatorUtils.geographicToWebMercator(point);
                 map.centerAt(wmpoint);
+
+                if (label) {
+                    var geocodeResult = {};
+                    geocodeResult.address = "Geocode Result";
+                    geocodeResult.location = point;
+                    showLocation(geocodeResult);
+                }
+
 
                 //show tab
                 $('#mymap').tab('show')
