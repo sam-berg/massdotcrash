@@ -372,8 +372,8 @@
                     content.push("<legend><b>" + (index + 1) + ". " + result.address + "</b></legend>");
                     content.push("<i>Score:</i> " + result.score);
                     content.push("<br/>");
-                    content.push("<i>Address Found In</i> : " + result.address);
-                    content.push("<br/><br/>");
+                    content.push("<i>Address Found In</i> : " + result.attributes.Loc_name);
+                    content.push("<br/>");
                     content.push("Latitude (y): " + y);
                     content.push("&nbsp;&nbsp;");
                     content.push("Longitude (x): " + x);
@@ -685,6 +685,7 @@
                         showResults4(results.features);
 
                         var myFeatureExtent = graphicsUtils.graphicsExtent(map.graphics.graphics);
+                        myFeatureExtent = myFeatureExtent.expand(3);
                         map.setExtent(myFeatureExtent);
 
                     },
@@ -925,6 +926,8 @@
                   var speed = response.features[0].attributes.Speed_Lim;
                   var name = response.features[0].attributes.St_Name;
 
+                  var newMeasure = response.features[0].attributes.measure;
+
                   var laneWidth = response.features[0].attributes.Lane_Width;
                   var medianType = response.features[0].attributes.Med_Type;
                   var shoulderL=response.features[0].attributes.Shldr_Lt_W;
@@ -951,7 +954,7 @@
                         //Route_ID_to_find=I495+SB&Measure_to_find=64.620761&Offset=300.00&Direction=N&
 
                         //var layerUrl = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
-                        var locations = 'Route_ID_to_find='  + rid  + '&Measure_to_find=' + measure + "&Offset=" + offset +"&Direction=" + direction;
+                        var locations = 'Route_ID_to_find='  + rid  + '&Measure_to_find=' + newMeasure + "&Offset=" + offset +"&Direction=" + direction;
                         //var attributeSet = '[{"layerId":46,"fields":["St_Name"]}, {"layerId":42,"fields":["Speed_Lim"]}, {"layerId":24,"fields":["Med_Type"]}, {"layerId":29,"fields":["Num_Lanes"]}, {"layerId":22,"fields":["Lane_Width"]}, {"layerId":38,"fields":["Shldr_Lt_W"]}, {"layerId":39,"fields":["Shldr_Rt_W"]}]';
 
                         var sURL = layerUrl + "?" + locations + "&env%3AoutSR=102100";
