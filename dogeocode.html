@@ -661,6 +661,8 @@
                         map.graphics.setOpacity(0);
                         showLocation(gR, a);
 
+                        map.centerAndZoom(result.geometry, 10);
+
 
                         //
                         if (bLookupHighway) {
@@ -672,8 +674,12 @@
 
                         }
                         else {
-                            map.graphics.setOpacity(1);
+                            map.graphics.setOpacity(1); 
                         }
+
+
+                        content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + geomLL.y + "," + geomLL.x + ")'/>");
+
                         rdiv.innerHTML += content.join("");
 
                     })
@@ -941,7 +947,7 @@
                         wkid: "4326"
                     });
                     var wmpoint = webMercatorUtils.geographicToWebMercator(point);
-                    map.centerAndZoom(wmpoint,20);
+                    map.centerAndZoom(wmpoint,11);
 
                     if (label) {
                         var geocodeResult = {};
@@ -999,7 +1005,7 @@
                     wkid: "4326"
                 });
                 var wmpoint = webMercatorUtils.geographicToWebMercator(point);
-                map.centerAndZoom(wmpoint, 20);
+                map.centerAndZoom(wmpoint, 11);
                 
                 if (label) {
                     var geocodeResult = {};
