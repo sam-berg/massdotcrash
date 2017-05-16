@@ -290,8 +290,8 @@
                     content.push("<i>Score:</i> " + result.score);
                     content.push("<br/>");
 
-                    if(result.attributes.Loc_name)
-                        content.push("<i>Address Found In</i> :<b> " + result.attributes.Loc_name + "</b>");
+                    if(result.feature.attributes.Loc_name)
+                        content.push("<i>Address Found In</i> :<b> " + result.feature.attributes.Loc_name + "</b>");
 
                     content.push("<br/><br/>");
                     content.push("Latitude (y): " + y);
