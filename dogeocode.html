@@ -1081,8 +1081,101 @@
                   var speed = response.features[0].attributes.Speed_Lim;
                   var name = response.features[0].attributes.St_Name;
 
-                  var fClass = response.features[0].attributes.F_Class;
-                  var fType = response.features[0].attributes.Facility;
+                  function getFClass(s) {
+
+                      var s2 = parseInt(s);
+                      if (s2 == 0) {
+                          return "Local";
+                      }
+                      else if (s2 == 1) {
+                          return "Interstate";
+                      }
+                      else if (s2 == 2) {
+                          return "Rural or urban principal arterial";
+                      }
+                      else if (s2 == 3) {
+                          return "Rural minor arterial or urban principal arterial";
+                      }
+         
+                      else if (s2 == 5) {
+                          return "Urban minor arterial or rural major collector";
+                      }
+                      else if (s2 == 6) {
+                          return "Urban collector or rural minor collector";
+                      }
+                      else if (s2 == 7) {
+                          return "Ramp - Interstate";
+                      }
+                      else if (s2 == 8) {
+                          return "Ramp - Non-Interstate";
+                      }
+                      //{
+                      //    name: "Local",
+                      //    code: 0
+                      //},
+                      //{
+                      //    name: "Interstate",
+                      //    code: 1
+                      //},
+                      //{
+                      //    name: "Rural or urban principal arterial",
+                      //    code: 2
+                      //},
+                      //{
+                      //    name: "Rural minor arterial or urban principal arterial",
+                      //    code: 3
+                      //},
+                      //{
+                      //    name: "Urban minor arterial or rural major collector",
+                      //    code: 5
+                      //},
+                      //{
+                      //    name: "Urban collector or rural minor collector",
+                      //    code: 6
+                      //},
+                      //{
+                      //    name: "Ramp - Interstate",
+                      //    code: 7
+                      //},
+                      //{
+                      //    name: "Ramp - Non-Interstate",
+                      //    code: 8
+                      //}
+
+
+                      return s;
+                  }
+
+                  function getFacility(s) {
+
+                      var s2 = parseInt(s);
+                      
+       
+                      if (s2 == 1) {
+                          return "One-Way Roadway";
+                      }
+                      else if (s2 == 2) {
+                          return "Two-Way Roadway";
+                      }
+                      else if (s2 == 3) {
+                          return "Couplet";
+                      }
+
+                      else if (s2 == 4) {
+                          return "Ramp";
+                      }
+                      else if (s2 == 5) {
+                          return "Non Mainline";
+                      }
+                      else if (s2 == 6) {
+                          return "Non Inventory Direction";
+                      }
+                      
+                      return s;
+                  }
+
+                  var fClass = getFClass( response.features[0].attributes.F_Class);
+                  var fType = getFacility(response.features[0].attributes.Facility);
 
                   var newMeasure = response.features[0].attributes.measure;
 
