@@ -178,7 +178,7 @@
                     map: null,
                     arcgisGeocoder: false,
                     geocoders: [{
-                        url: "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer",
+                        url: "https://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer",
                         name: "Esri Geocoder USA",
                         placeholder: "Locate",
                         outFields: "*"
@@ -812,7 +812,7 @@
 
                     q.outSpatialReference = new SpatialReference({wkid:4326});
                     q.where = "intersectionname='" + dom.byId("address").value + " & " + dom.byId("intersection").value + "'";
-                    var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOTStreetNameIntersections/FeatureServer/0";
+                    var sURL = "https://dot.esri.com/server/rest/services/Hosted/MassDOTStreetNameIntersections/FeatureServer/0";
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
                         //alert(results.features.length);
