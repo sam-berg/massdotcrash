@@ -841,7 +841,7 @@
                     q.outSpatialReference = new SpatialReference({ wkid: 4326 });
                     q.where = "route_id='" + dom.byId("route").value + "' AND mile_point=" + dom.byId("milepost").value + "";
                     //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0";
-                    var sURL="http://dot.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0"
+                    var sURL="https://dot.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0"
 
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
@@ -869,7 +869,7 @@
                     q.where = "upper(landmark_name) = '" + dom.byId("landmark").value.toUpperCase() + "'";
                     //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
                     var sURL="http://dot.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
-                    
+
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
 
@@ -1070,7 +1070,9 @@
             var index = i.toString();
 
             //esri/request
-            var layerUrl = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
+            //var layerUrl = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
+            var layerUrl = "https://dot2.esri.com/arcgis/rest/services/Massachusetts/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
+            
             var locations = '[{"routeId":' + "\"" + rid + "\"" + ',"measure":' + measure + '}]';
             var attributeSet = '[{"layerId":12,"fields":["Facility"]},{"layerId":15,"fields":["F_Class"]},{"layerId":46,"fields":["St_Name"]}, {"layerId":42,"fields":["Speed_Lim"]}, {"layerId":24,"fields":["Med_Type"]}, {"layerId":29,"fields":["Num_Lanes"]}, {"layerId":22,"fields":["Lane_Width"]}, {"layerId":38,"fields":["Shldr_Lt_W"]}, {"layerId":39,"fields":["Shldr_Rt_W"]}]';
 
