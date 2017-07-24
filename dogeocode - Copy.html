@@ -24,26 +24,6 @@
             font-size:12px;
         }
 
-        .highwayRowTitle{
-            height:40px;
-            border-bottom:3px solid;
-        }
-
-        .highwayField{
-            width: 200px;
-            float: left;
-            text-decoration:underline
-        }
-
-        .highwayValue{
-            width: 50%;
-            float: left;
-            font-weight:bold; 
-        }
-
-        .llValue{
-           font-weight:bold;
-        }
         input:focus::-webkit-input-placeholder 
 {
     color: transparent;
@@ -138,7 +118,7 @@
           "esri/tasks/query",
           "esri/tasks/QueryTask",
           "esri/request",
-          "esri/SpatialReference", "esri/graphic","esri/graphicsUtils",
+          "esri/SpatialReference", "esri/graphic",
           "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleMarkerSymbol",
           "esri/symbols/Font", "esri/symbols/TextSymbol",
           "esri/geometry/Point", "esri/geometry/Extent",
@@ -152,7 +132,7 @@
           Map, Locator, Geocoder,
           Query, QueryTask,
           esriRequest,
-          SpatialReference, Graphic,graphicsUtils,
+          SpatialReference, Graphic,
           SimpleLineSymbol, SimpleMarkerSymbol,
           Font, TextSymbol,
           Point, Extent,
@@ -162,12 +142,10 @@
         ) {
             parser.parse();
 
-            //{"xmin":-8181819.507643144,"ymin":5080281.0561183,"xmax":-7785569.953012895,"ymax":5284520.795696237,"spatialReference":{"wkid":102100}}
-
             map = new Map("map", {
                 basemap: "topo",
-                extent: new Extent({"xmin":-8181819.507643144,"ymin":5080281.0561183,"xmax":-7785569.953012895,"ymax":5284520.795696237,"spatialReference":{"wkid":102100}})
-            
+                center: [-96.311, 43.676],
+                zoom: 3
             });
 
             locator = new Locator("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
@@ -215,7 +193,7 @@
             registry.byId("btnAddress").on("click", setupAddressUI);
             registry.byId("btnIntersection").on("click", setupIntersectionUI);
             registry.byId("btnMileMarker").on("click", setupMileMarkerUI);
-            registry.byId("btnLandmarks").on("click", setupLandmarksUI);
+
 
             //Draw and zoom to the result when the geocoding is complete
             locator.on("address-to-locations-complete", function (evt) {
@@ -289,10 +267,7 @@
                     content.push("<legend><b>" + (i + 1) + ". " + result.address + "</b></legend>");
                     content.push("<i>Score:</i> " + result.score);
                     content.push("<br/>");
-
-                    //if(result.feature.attributes.Loc_name)
-                    //    content.push("<i>Address Found In</i> :<b> " + result.feature.attributes.Loc_name + "</b>");
-
+                    content.push("<i>Address Found In</i> : " + result.address);
                     content.push("<br/><br/>");
                     content.push("Latitude (y): " + y);
                     content.push("&nbsp;&nbsp;");
@@ -314,7 +289,7 @@
                     //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
                     content.push("<br/><br/>");
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + location_xy.y + "," + location_xy.x + ")'/>");
-                    //content.push("<input style='margin-left:10px;' type='button' value='Lookup' onclick='doSelect(" + location_xy.y + "," + location_xy.x + ")'/>");
+                    content.push("<input style='margin-left:10px;' type='button' value='Lookup' onclick='doSelect(" + location_xy.y + "," + location_xy.x + ")'/>");
 
                     content.push("</fieldset>");
 
@@ -323,11 +298,6 @@
                     gR.address = result.address;
                     showLocation(gR);
                 }
-
-                //zoom to extent of graphics
-                var myFeatureExtent = graphicsUtils.graphicsExtent(map.graphics.graphics);
-                map.setExtent(myFeatureExtent);
-
                 rdiv.innerHTML += content.join("");
             }
             function showResults2(results) {
@@ -395,8 +365,8 @@
                     content.push("<legend><b>" + (index + 1) + ". " + result.address + "</b></legend>");
                     content.push("<i>Score:</i> " + result.score);
                     content.push("<br/>");
-                    content.push("<i>Address Found In</i> :<b> " + result.attributes.Loc_name + "</b>");
-                    content.push("<br/>");
+                    content.push("<i>Address Found In</i> : " + result.address);
+                    content.push("<br/><br/>");
                     content.push("Latitude (y): " + y);
                     content.push("&nbsp;&nbsp;");
                     content.push("Longitude (x): " + x);
@@ -472,7 +442,7 @@
                     var offset = 0;
 
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
-                    //content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + "\"" + rid + "\"" + "," + measure + "," + offset + ")'/>");
+                    content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + "\"" + rid + "\"" + "," + measure + "," + offset + ")'/>");
 
                     //content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
                     content.push("</fieldset>");
@@ -501,28 +471,20 @@
                     content.push("<br/>");
                     content.push("<i>Address Found In</i> : " + name);
                     content.push("<br/><br/>");
-                    content.push("<div>Latitude (y):<div class='llValue'> " + y + "</div></div>");
+                    content.push("Latitude (y): " + y);
                     content.push("&nbsp;&nbsp;");
-                    content.push("<div>Longitude (x):<div class='llValue'>" + x + "</div></div>");
+                    content.push("Longitude (x): " + x);
                     content.push("<br/><br/>");
 
                     var sIndex = index.toString();
-                    content.push("<div id='divLRSInfo' class='highwayRowTitle' style='display:none'><b>Highway Information</b></div><br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Name:</div> " + "<span class='highwayValue' id='divName" + sIndex +"'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Route: </div> <span class='highwayValue'>" + result.attributes.route_id + "</span></div><br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Measure:</div> <span class='highwayValue'>" + result.attributes.measure + "</span></div><br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Number of Lanes: </div>" + "<span class='highwayValue' id='divLanes" + sIndex + "'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Speed Limit: </div>" + "<span class='highwayValue' id='divSpeedLimit" + sIndex + "'></span></div>" + "<br/>");
+                    content.push("<div id='divLRSInfo' style='display:none'><b>Highway Information ------<br/><br/>");
+                    content.push("Name: " + "<span id='divName" + sIndex +"'></span>" + "<br/><br/>");
+                    content.push("Route: " + result.attributes.route_id + "<br/><br/>");
+                    content.push("Measure: " + result.attributes.measure + "<br/><br/>");
+                    content.push("Number of Lanes: " + "<span id='divLanes" + sIndex + "'></span>" + "<br/><br/>");
+                    content.push("Speed Limit: " + "<span id='divSpeedLimit" + sIndex + "'></span>" + "<br/><br/>");
 
-                    content.push("<div class='highwayRow'><div class='highwayField'>Functional Type:</div> " + "<span class='highwayValue' id='divFunctionalType" + sIndex + "'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Functional Class: </div>" + "<span class='highwayValue' id='divFunctionalClass" + sIndex + "'></span></div>" + "<br/>");
-
-                    content.push("<div class='highwayRow'><div class='highwayField'>Lane Width: </div>" + "<span class='highwayValue' id='divLaneWidth" + sIndex + "'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Median Type Code: </div>" + "<span class='highwayValue' id='divMedianType" + sIndex + "'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Left Shoulder Width: </div>" + "<span class='highwayValue' id='divShoulderL" + sIndex + "'></span></div>" + "<br/>");
-                    content.push("<div class='highwayRow'><div class='highwayField'>Right Shoulder Width: </div>" + "<span class='highwayValue' id='divShoulderR" + sIndex + "'></span></div>" + "<br/>");
-
-                    content.push("" + "</b></div><br/><br/>");
+                    content.push("-----------------" + "</b></div><br/><br/>");
 
                     //content.push("<b>GeoRSS-Simple</b><br/>");
                     //content.push("&lt;georss:point&gt;" + y + " " + x + "&lt;/georss:point&gt;");
@@ -548,9 +510,8 @@
 
 
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
-                    //content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + sIndex +"," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")'/>");
+                    content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + sIndex +"," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")'/>");
 
-                    
                     //content.push("<input id='btnSelect" + index.toString() + "' style='margin-left:10px;' type='button' value='Select' />");
                     //onclick='doRouteLookup(" + sIndex + "," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")
 
@@ -562,133 +523,11 @@
                     gR.address = name;
 
                     gR.MYINDEX = index.toString();
-                    var a = { "MYID": index.toString() };
 
-                    map.graphics.setOpacity(0);
-                    showLocation(gR,a);
+                    showLocation(gR);
 
-
-                    //
-                    if (0 == 0) {
-
-
-                        doRouteLookup(sIndex, rid, measure, offset, direction);
-
-                    }
                 });
                 rdiv.innerHTML += content.join("");
-            }
-            function showResults55(results) {
-
-                if (results.length < 1) {
-                    alert("Landmark was not found.");
-                    return;
-                }
-                var rdiv = dom.byId("resultsdiv");
-                rdiv.innerHTML = "<p><b>Results : " + results.length + "</b></p>";
-                map.graphics.clear();
-                var content = [];
-
-                arrayUtils.forEach(results, function (result, index) {
-                    var x = result.geometry.x.toFixed(5);
-                    var y = result.geometry.y.toFixed(5);
-
-
-                    //XY to route measure
-                    var sLayerURL = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure";
-                    var locations="?locations=[{'geometry':{'x':" + x + ",'y':" + y +"}}]&tolerance=100&inSR=102100";
-                    var sURL = sLayerURL + locations;
-
-                    var layersRequest = esri.request({
-                        url: sURL,
-                        content: { f: "json" },
-                        handleAs: "json",
-                        callbackParamName: "callback"
-                    });
-
-
-                    layersRequest.then(function(newResults){
-
-                        var measure = "";
-                        var rid = "";
-                        var geomLL = webMercatorUtils.webMercatorToGeographic(result.geometry);
-                        var name = result.attributes["landmark_name"];
-
-                        var bLookupHighway = false;
-                        if (newResults.locations[0].results.length >0) {
- 
-                            measure = newResults.locations[0].results[0].measure;
-                            rid = newResults.locations[0].results[0].routeId;
-                            //geomLL = webMercatorUtils.webMercatorToGeographic(result.geometry);
-                            //name = result.attributes["landmark_name"];
-                            bLookupHighway = true;
-                        }
-
- 
-                        content.push("<fieldset>");
-                        content.push("<legend><b>" + (index + 1) + ". " + name + "</b></legend>");
-                        content.push("<i>Score:</i> " + "100");
-                        content.push("<br/>");
-                        content.push("<i>Address Found In</i> : " + "LANDMARKS");
-                        content.push("<br/><br/>");
-                        content.push("<div>Latitude (y):<div class='llValue'> " + geomLL.y + "</div></div>");
-                        content.push("&nbsp;&nbsp;");
-                        content.push("<div>Longitude (x):<div class='llValue'>" + geomLL.x + "</div></div>");
-                        content.push("<br/><br/>");
-
-                        var sIndex = index.toString();
-                        content.push("<div id='divLRSInfo' class='highwayRowTitle' style='display:none'><b>Highway Information</b></div><br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Name:</div> " + "<span class='highwayValue' id='divName" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Route: </div> <span class='highwayValue'>" + rid + "</span></div><br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Measure:</div> <span class='highwayValue'>" + measure + "</span></div><br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Number of Lanes: </div>" + "<span class='highwayValue' id='divLanes" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Speed Limit: </div>" + "<span class='highwayValue' id='divSpeedLimit" + sIndex + "'></span></div>" + "<br/>");
-
-                        content.push("<div class='highwayRow'><div class='highwayField'>Functional Type:</div> " + "<span class='highwayValue' id='divFunctionalType" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Functional Class: </div>" + "<span class='highwayValue' id='divFunctionalClass" + sIndex + "'></span></div>" + "<br/>");
-
-                        content.push("<div class='highwayRow'><div class='highwayField'>Lane Width: </div>" + "<span class='highwayValue' id='divLaneWidth" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Median Type Code: </div>" + "<span class='highwayValue' id='divMedianType" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Left Shoulder Width: </div>" + "<span class='highwayValue' id='divShoulderL" + sIndex + "'></span></div>" + "<br/>");
-                        content.push("<div class='highwayRow'><div class='highwayField'>Right Shoulder Width: </div>" + "<span class='highwayValue' id='divShoulderR" + sIndex + "'></span></div>" + "<br/>");
-
-                        content.push("" + "</b></div><br/><br/>");
-
-                        var gR = {};
-                        gR.location = geomLL;
-                        gR.address = name;
-
-                        gR.MYINDEX = index.toString();
-                        var a = { "MYID": index.toString() };
-
-                        map.graphics.setOpacity(0);
-                        showLocation(gR, a);
-
-                        map.centerAndZoom(result.geometry, 10);
-
-
-                        //
-                        if (bLookupHighway) {
-
-                            var offset = dojo.byId("offset").value;
-                            var direction = dojo.byId("direction").value;
-
-                            doRouteLookup(sIndex, rid, measure, offset, direction);
-
-                        }
-                        else {
-                            map.graphics.setOpacity(1); 
-                        }
-
-
-                        content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + geomLL.y + "," + geomLL.x + ")'/>");
-
-                        rdiv.innerHTML += content.join("");
-
-                    })
-                    
-                });
-                
             }
 
             function showResults6(results) {
@@ -754,7 +593,7 @@
 
 
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
-                    //content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + sIndex + "," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")'/>");
+                    content.push("<input style='margin-left:10px;' type='button' value='Select' onclick='doRouteLookup(" + sIndex + "," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")'/>");
 
                     //content.push("<input id='btnSelect" + index.toString() + "' style='margin-left:10px;' type='button' value='Select' />");
                     //onclick='doRouteLookup(" + sIndex + "," + "\"" + rid + "\"" + "," + measure + "," + offset + "," + "\"" + direction + "\"" + ")
@@ -787,9 +626,6 @@
                 if (dom.byId("route").value != "" && dom.byId("milepost").value != "")
                     sType = "MILEMARKER";
 
-                if (dom.byId("landmark").value != "" )
-                    sType = "LANDMARK";
-
                 if (sType == "ADDRESS") {
                     var address = {
                         SingleLine: dom.byId("address").value
@@ -800,16 +636,11 @@
                     };
                     //optionally return the out fields if you need to calculate the extent of the geocoded point
                     locator.addressToLocations(options);
-                    $('#myTabs a:last').tab('show');
                 }
                 else if (sType == "INTERSECTION") {
-                    alert("Intersections Not Available.")
-                    return;
-
                     var q = new Query();
                     q.returnGeometry = true;
                     q.outFields = ["*"];
-
                     q.outSpatialReference = new SpatialReference({wkid:4326});
                     q.where = "intersectionname='" + dom.byId("address").value + " & " + dom.byId("intersection").value + "'";
                     var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOTStreetNameIntersections/FeatureServer/0";
@@ -820,17 +651,12 @@
                         //.routeid
                         //.measure
                         showResults4(results.features);
-
-                        var myFeatureExtent = graphicsUtils.graphicsExtent(map.graphics.graphics);
-                        myFeatureExtent = myFeatureExtent.expand(3);
-                        map.setExtent(myFeatureExtent);
-
                     },
                     function (error) {
                         console.log("error");
                     }
                     );
-                    $('#myTabs a:last').tab('show');
+
                 }
                 else if (sType == "MILEMARKER") {
                     var q = new Query();
@@ -838,14 +664,9 @@
                     q.outFields = ["*"];
                     q.outSpatialReference = new SpatialReference({ wkid: 4326 });
                     q.where = "route_id='" + dom.byId("route").value + "' AND mile_point=" + dom.byId("milepost").value + "";
-                    //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0";
-                    var sURL="http://dot.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0"
-
+                    var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0";
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
-
-
-
                         //alert(results.features.length);
                         //.intersectionname
                         //.routeid
@@ -856,37 +677,14 @@
                         console.log("error");
                     }
                     );
-
-                    //$('#myTabs a:first').tab('show');
-                }
-                else if (sType == "LANDMARK") {
-                    var q = new Query();
-                    q.returnGeometry = true;
-                    q.outFields = ["*"];
-                    q.outSpatialReference = new SpatialReference({ wkid: 102100 });
-                    q.where = "upper(landmark_name) = '" + dom.byId("landmark").value.toUpperCase() + "'";
-                    //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
-                    var sURL="http://dot.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
-                    
-                    var qT = new QueryTask(sURL);
-                    qT.execute(q, function (results) {
-
-                        showResults55(results.features);
-                    },
-                    function (error) {
-                        console.log("error");
-                    }
-                    );
-
-                    //$('#myTabs a:first').tab('show');
                 }
 
 
-                
+                $('#myTabs a:last').tab('show');
 
             }
 
-            function showLocation20(geocodeResult, attr) {
+            function showLocation(geocodeResult) {
                 //map.graphics.clear();
 
                 //create a random color for the text and marker symbol
@@ -903,39 +701,7 @@
                     10
                     ), new Color([r, g, b, 0.9]));
                 var pointMeters = webMercatorUtils.geographicToWebMercator(geocodeResult.location);
-                var locationGraphic = new Graphic(pointMeters, symbol, attr);
-
-                var font = new Font().setSize("12pt").setWeight(Font.WEIGHT_BOLD);
-                var textSymbol = new TextSymbol(
-                    geocodeResult.address,
-                    font,
-                    new Color([r, g, b, 0.8])
-                ).setOffset(5, 15);
-
-
-                map.graphics.add(locationGraphic);
-                map.graphics.add(new Graphic(pointMeters, textSymbol, attr));
-
-            }
-
-            function showLocation(geocodeResult,attr) {
-                //map.graphics.clear();
-
-                //create a random color for the text and marker symbol
-                var r = Math.floor(Math.random() * 250);
-                var g = Math.floor(Math.random() * 100);
-                var b = Math.floor(Math.random() * 100);
-
-                var symbol = new SimpleMarkerSymbol(
-                    SimpleMarkerSymbol.STYLE_CIRCLE,
-                    20,
-                    new SimpleLineSymbol(
-                    SimpleLineSymbol.STYLE_SOLID,
-                    new Color([r, g, b, 0.5]),
-                    10
-                    ), new Color([r, g, b, 0.9]));
-                var pointMeters = webMercatorUtils.geographicToWebMercator(geocodeResult.location);
-                var locationGraphic = new Graphic(pointMeters, symbol,attr);
+                var locationGraphic = new Graphic(pointMeters, symbol);
 
                 var font = new Font().setSize("12pt").setWeight(Font.WEIGHT_BOLD);
                 var textSymbol = new TextSymbol(
@@ -946,7 +712,7 @@
 
            
                 map.graphics.add(locationGraphic);
-                map.graphics.add(new Graphic(pointMeters, textSymbol, attr));
+                map.graphics.add(new Graphic(pointMeters, textSymbol));
 
             }
 
@@ -958,7 +724,7 @@
                         wkid: "4326"
                     });
                     var wmpoint = webMercatorUtils.geographicToWebMercator(point);
-                    map.centerAndZoom(wmpoint,17);
+                    map.centerAndZoom(wmpoint,20);
 
                     if (label) {
                         var geocodeResult = {};
@@ -987,10 +753,7 @@
                 clearUI();
                 dojo.byId("address").value = "673 Boylston Ave, Boston, MA";
             }
-            function setupLandmarksUI() {
-                clearUI();
-                dojo.byId("landmark").value = "Boylston Walmart";
-            }
+
             function setupIntersectionUI() {
                 clearUI();
                 dojo.byId("address").value = "I93 NB";
@@ -1001,7 +764,7 @@
                 clearUI();
                 dojo.byId("route").value = "I93 NB";
                 dojo.byId("milepost").value = "18.2";
-                dojo.byId("offset").value = "0";
+                dojo.byId("offset").value = "250";
                 dojo.byId("direction").value = "N";
             }
         });
@@ -1016,7 +779,7 @@
                     wkid: "4326"
                 });
                 var wmpoint = webMercatorUtils.geographicToWebMercator(point);
-                map.centerAndZoom(wmpoint, 17);
+                map.centerAndZoom(wmpoint, 20);
                 
                 if (label) {
                     var geocodeResult = {};
@@ -1070,7 +833,7 @@
             //esri/request
             var layerUrl = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
             var locations = '[{"routeId":' + "\"" + rid + "\"" + ',"measure":' + measure + '}]';
-            var attributeSet = '[{"layerId":12,"fields":["Facility"]},{"layerId":15,"fields":["F_Class"]},{"layerId":46,"fields":["St_Name"]}, {"layerId":42,"fields":["Speed_Lim"]}, {"layerId":24,"fields":["Med_Type"]}, {"layerId":29,"fields":["Num_Lanes"]}, {"layerId":22,"fields":["Lane_Width"]}, {"layerId":38,"fields":["Shldr_Lt_W"]}, {"layerId":39,"fields":["Shldr_Rt_W"]}]';
+            var attributeSet='[{"layerId":46,"fields":["St_Name"]}, {"layerId":42,"fields":["Speed_Lim"]}, {"layerId":24,"fields":["Med_Type"]}, {"layerId":29,"fields":["Num_Lanes"]}, {"layerId":22,"fields":["Lane_Width"]}, {"layerId":38,"fields":["Shldr_Lt_W"]}, {"layerId":39,"fields":["Shldr_Rt_W"]}]';
 
             var sURL = layerUrl + "?locations=" + locations + "&attributeSet=" + attributeSet;
 
@@ -1089,120 +852,9 @@
                   var speed = response.features[0].attributes.Speed_Lim;
                   var name = response.features[0].attributes.St_Name;
 
-                  function getFClass(s) {
-
-                      var s2 = parseInt(s);
-                      if (s2 == 0) {
-                          return "Local";
-                      }
-                      else if (s2 == 1) {
-                          return "Interstate";
-                      }
-                      else if (s2 == 2) {
-                          return "Rural or urban principal arterial";
-                      }
-                      else if (s2 == 3) {
-                          return "Rural minor arterial or urban principal arterial";
-                      }
-         
-                      else if (s2 == 5) {
-                          return "Urban minor arterial or rural major collector";
-                      }
-                      else if (s2 == 6) {
-                          return "Urban collector or rural minor collector";
-                      }
-                      else if (s2 == 7) {
-                          return "Ramp - Interstate";
-                      }
-                      else if (s2 == 8) {
-                          return "Ramp - Non-Interstate";
-                      }
-                      //{
-                      //    name: "Local",
-                      //    code: 0
-                      //},
-                      //{
-                      //    name: "Interstate",
-                      //    code: 1
-                      //},
-                      //{
-                      //    name: "Rural or urban principal arterial",
-                      //    code: 2
-                      //},
-                      //{
-                      //    name: "Rural minor arterial or urban principal arterial",
-                      //    code: 3
-                      //},
-                      //{
-                      //    name: "Urban minor arterial or rural major collector",
-                      //    code: 5
-                      //},
-                      //{
-                      //    name: "Urban collector or rural minor collector",
-                      //    code: 6
-                      //},
-                      //{
-                      //    name: "Ramp - Interstate",
-                      //    code: 7
-                      //},
-                      //{
-                      //    name: "Ramp - Non-Interstate",
-                      //    code: 8
-                      //}
-
-
-                      return s;
-                  }
-
-                  function getFacility(s) {
-
-                      var s2 = parseInt(s);
-                      
-       
-                      if (s2 == 1) {
-                          return "One-Way Roadway";
-                      }
-                      else if (s2 == 2) {
-                          return "Two-Way Roadway";
-                      }
-                      else if (s2 == 3) {
-                          return "Couplet";
-                      }
-
-                      else if (s2 == 4) {
-                          return "Ramp";
-                      }
-                      else if (s2 == 5) {
-                          return "Non Mainline";
-                      }
-                      else if (s2 == 6) {
-                          return "Non Inventory Direction";
-                      }
-                      
-                      return s;
-                  }
-
-                  var fClass = getFClass( response.features[0].attributes.F_Class);
-                  var fType = getFacility(response.features[0].attributes.Facility);
-
-                  var newMeasure = response.features[0].attributes.measure;
-
-                  var laneWidth = response.features[0].attributes.Lane_Width;
-                  var medianType = response.features[0].attributes.Med_Type;
-                  var shoulderL=response.features[0].attributes.Shldr_Lt_W;
-                  var shoulderR =response.features[0].attributes.Shldr_Rt_W;
-
-                  if(lanes)dojo.byId("divLanes" + index).innerText = lanes.toString();
-                  if(fClass)dojo.byId("divFunctionalClass" + index).innerText = fClass.toString();
-                  if(fType)dojo.byId("divFunctionalType" + index).innerText = fType.toString();
-                  if(speed)dojo.byId("divSpeedLimit" + index).innerText = speed.toString();
-                  if(name)dojo.byId("divName" + index).innerText = name.toString();
-
-                  if(laneWidth)dojo.byId("divLaneWidth" + index).innerText = laneWidth.toString();
-                  if(medianType)dojo.byId("divMedianType" + index).innerText = medianType.toString();
-                  if(shoulderL)dojo.byId("divShoulderL" + index).innerText = shoulderL.toString();
-                  if(shoulderR)dojo.byId("divShoulderR" + index).innerText = shoulderR.toString();
-
+                  dojo.byId("divLanes" + index).innerText = lanes.toString();
+                  dojo.byId("divSpeedLimit" + index).innerText = speed.toString();
+                  dojo.byId("divName" + index).innerText = name.toString();
                   dojo.byId("divLRSInfo").style.display = "block";
 
 
@@ -1215,10 +867,10 @@
                         //Route_ID_to_find=I495+SB&Measure_to_find=64.620761&Offset=300.00&Direction=N&
 
                         //var layerUrl = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/queryAttributeSet";
-                        var locations = 'Route_ID_to_find='  + rid  + '&Measure_to_find=' + newMeasure + "&Offset=" + offset +"&Direction=" + direction;
+                        var locations = 'Route_ID_to_find='  + rid  + '&Measure_to_find=' + measure + "&Offset=" + offset +"&Direction=" + direction;
                         //var attributeSet = '[{"layerId":46,"fields":["St_Name"]}, {"layerId":42,"fields":["Speed_Lim"]}, {"layerId":24,"fields":["Med_Type"]}, {"layerId":29,"fields":["Num_Lanes"]}, {"layerId":22,"fields":["Lane_Width"]}, {"layerId":38,"fields":["Shldr_Lt_W"]}, {"layerId":39,"fields":["Shldr_Rt_W"]}]';
 
-                        var sURL = layerUrl + "?" + locations + "&env%3AoutSR=102100";
+                        var sURL = layerUrl + "?" + locations + "&env%3AoutSR=3857";
 
                         //locations=%5B%7B%22routeId%22%3A%22I495+SB%22%2C%22measure%22%3A64.620761%7D%5D&attributeSet=%5B%7B%22layerId%22%3A46%2C%22fields%22%3A%5B%22St_Name%22%5D%7D%2C+%7B%22layerId%22%3A42%2C%22fields%22%3A%5B%22Speed_Lim%22%5D%7D%2C+%7B%22layerId%22%3A24%2C%22fields%22%3A%5B%22Med_Type%22%5D%7D%2C+%7B%22layerId%22%3A29%2C%22fields%22%3A%5B%22Num_Lanes%22%5D%7D%2C+%7B%22layerId%22%3A22%2C%22fields%22%3A%5B%22Lane_Width%22%5D%7D%2C+%7B%22layerId%22%3A38%2C%22fields%22%3A%5B%22Shldr_Lt_W%22%5D%7D%2C+%7B%22layerId%22%3A39%2C%22fields%22%3A%5B%22Shldr_Rt_W%22%5D%7D%5D&temporalViewDate=&outSR=&gdbVersion";
                         var layersRequest = esri.request({
@@ -1231,33 +883,14 @@
                           function (response) {
                               console.log("Success: ", response);
                        
-                              var nl = response.results[0].value.features[0].geometry;
-                              var sr=response.results[0].value.spatialReference;
+                              var newLocation = response.results[0].value.features[0].geometry;
 
-                              var newLocation = new esri.geometry.Point(nl.x,nl.y,sr);
-                              //newLocation.type = "point";
-                              //newLocation.spatialReference=response.results[0].value.spatialReference;
-
-                              for (var i = 0; i < map.graphics.graphics.length; i++) {
-                                  var f = map.graphics.graphics[i];
-                                  if (f.attributes && f.attributes.MYID == index) {
-                                      f.setGeometry( newLocation);
+                              for (var i = 0; i < map.graphics.length; i++) {
+                                  var f = map.graphics[i];
+                                  if (f.attributes.MYID == index) {
+                                      f.geometry = newLocation;
                                   }
                               }
-
-                              map.graphics.setOpacity(1);
-
-                              //(xmin, ymin, xmax, ymax, spatialReference)
-                              //var tol = 1000;
-                              //var xmin = nl.x - tol;
-                              //var xmax = nl.x + tol;
-                              //var ymin = nl.y - tol;
-                              //var ymax = nl.y + tol;
-
-                              //var myFeatureExtent = new esri.geometry.Extent(xmin, ymin, xmax, ymax, sr);// graphicsUtils.graphicsExtent(map.graphics.graphics);
-                              //map.extent=myFeatureExtent;
-
-
                               //var gR = {};
                               //gR.location = response.results[0].value.features[0].geometry;
                               //gR.address = name;
@@ -1295,6 +928,9 @@
                   console.log("Error: ", error.message);
               });
 
+
+
+
         }
 
     </script>
@@ -1314,7 +950,6 @@
                 <button id="btnAddress" data-dojo-type="dijit/form/Button">Address</button>
                 <button id="btnIntersection" data-dojo-type="dijit/form/Button">Intersection</button>
                 <button id="btnMileMarker" data-dojo-type="dijit/form/Button">Mile Marker</button>
-                <button id="btnLandmarks" data-dojo-type="dijit/form/Button">Landmarks</button>
             </div>
             <div id="searchRow">
                 <div>
