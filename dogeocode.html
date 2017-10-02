@@ -812,7 +812,7 @@
 
                     q.outSpatialReference = new SpatialReference({wkid:4326});
                     q.where = "intersectionname='" + dom.byId("address").value + " & " + dom.byId("intersection").value + "'";
-                    var sURL = "https://dot.esri.com/server/rest/services/Hosted/MassDOTStreetNameIntersections/FeatureServer/0";
+                    var sURL = "https://services.arcgis.com/6I1ysurtNWNxkuwd/arcgis/rest/services/StreetNameIntersection/FeatureServer/0";
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
                         //alert(results.features.length);
@@ -839,7 +839,7 @@
                     q.outSpatialReference = new SpatialReference({ wkid: 4326 });
                     q.where = "route_id='" + dom.byId("route").value + "' AND mile_point=" + dom.byId("milepost").value + "";
                     //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0";
-                    var sURL="https://dot.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0"
+                    var sURL="https://dot2.esri.com/arcgis/rest/services/Massachusetts/MassDOTMileMarkers/MapServer"
 
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
@@ -866,7 +866,7 @@
                     q.outSpatialReference = new SpatialReference({ wkid: 102100 });
                     q.where = "upper(landmark_name) = '" + dom.byId("landmark").value.toUpperCase() + "'";
                     //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
-                    var sURL="https://dot.esri.com/server/rest/services/Hosted/MassDOT_Landmarks_Demo/FeatureServer/0";
+                    var sURL="https://services.arcgis.com/6I1ysurtNWNxkuwd/ArcGIS/rest/services/MassDOT_Landmarks/FeatureServer/0";
 
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
