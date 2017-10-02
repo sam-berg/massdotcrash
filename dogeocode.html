@@ -839,7 +839,7 @@
                     q.outSpatialReference = new SpatialReference({ wkid: 4326 });
                     q.where = "route_id='" + dom.byId("route").value + "' AND mile_point=" + dom.byId("milepost").value + "";
                     //var sURL = "https://dot4.esri.com/server/rest/services/Hosted/MassDOT_Mile_Markers/FeatureServer/0";
-                    var sURL="https://dot2.esri.com/arcgis/rest/services/Massachusetts/MassDOTMileMarkers/MapServer"
+                    var sURL="https://dot2.esri.com/arcgis/rest/services/Massachusetts/MassDOTMileMarkers/MapServer/0"
 
                     var qT = new QueryTask(sURL);
                     qT.execute(q, function (results) {
@@ -1430,7 +1430,7 @@
 
     </div>
              <div>
-                <a href="http://dot.esri.com/portal/apps/GeoForm/index.html?appid=ba346780f82544409560a0d84fd9cd6d" target="_new">Manage...</a>
+                <a href="http://esridot.maps.arcgis.com/apps/GeoForm/index.html?appid=328b8b48b4ed44eaab890ea6127de51f" target="_new">Manage...</a>
             </div>
             <div>
                 <img style="" src="images/vhblogo.png" />
