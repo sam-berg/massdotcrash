@@ -434,10 +434,10 @@
                     var x = result.geometry.x.toFixed(5);
                     var y = result.geometry.y.toFixed(5);
                     content.push("<fieldset>");
-                    content.push("<legend><b>" + (index + 1) + ". " + result.attributes.intersectionname + "</b></legend>");
+                    content.push("<legend><b>" + (index + 1) + ". " + result.attributes.INTERSECTIONNAME + "</b></legend>");
                     content.push("<i>Score:</i> " + "100");
                     content.push("<br/>");
-                    content.push("<i>Address Found In</i> : " + result.attributes.intersectionname);
+                    content.push("<i>Address Found In</i> : " + result.attributes.INTERSECTIONNAME);
                     content.push("<br/><br/>");
                     content.push("Latitude (y): " + y);
                     content.push("&nbsp;&nbsp;");
@@ -446,8 +446,8 @@
 
 
                     content.push("<div id='divHighway'><b>Highway Information ------<br/><br/>");
-                    content.push("Route: " + result.attributes.routeid + "<br/><br/>");
-                    content.push("Measure: " + result.attributes.measure + "<br/><br/>");
+                    content.push("Route: " + result.attributes.ROUTEID + "<br/><br/>");
+                    content.push("Measure: " + result.attributes.Measure + "<br/><br/>");
                     content.push("-----------------" + "</b></div><br/><br/>");
 
                     //content.push("<b>GeoRSS-Simple</b><br/>");
@@ -467,8 +467,8 @@
                     //content.push("<b>Geo JSON</b><br/>");
                     //content.push('"geometry": {"type": "Point", "coordinates": [' + y + ',' + x + ']}');
                     content.push("<br/><br/>");
-                    var rid = result.attributes.routeid;
-                    var measure = result.attributes.measure;
+                    var rid = result.attributes.ROUTEID;
+                    var measure = result.attributes.Measure;
                     var offset = 0;
 
                     content.push("<input type='button' value='Center At Address' onclick='zoomTo(" + y + "," + x + ")'/>");
@@ -479,7 +479,7 @@
 
                     var gR = {};
                     gR.location = result.geometry;
-                    gR.address = result.attributes.intersectionname;
+                    gR.address = result.attributes.INTERSECTIONNAME;
                     showLocation(gR);
 
                 });
