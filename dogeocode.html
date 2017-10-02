@@ -598,7 +598,7 @@
                     //var sLayerURL = "https://dot2.esri.com/arcgis/rest/services/MassDOT/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure";
                     var sLayerURL = "https://dot2.esri.com/arcgis/rest/services/Massachusetts/MassDOTLRSMap/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure";
                     
-                    var locations="?locations=[{'geometry':{'x':" + x + ",'y':" + y +"}}]&tolerance=100&inSR=102100";
+                    var locations="?locations=[{'geometry':{'x':" + x + ",'y':" + y +"}}]&tolerance=1000&inSR=102100";
                     var sURL = sLayerURL + locations;
 
                     var layersRequest = esri.request({
